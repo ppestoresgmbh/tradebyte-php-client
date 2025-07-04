@@ -1,6 +1,7 @@
 {
   "name": "ppestoresgmbh/tradebyte-php-client",
   "description": "A PHP rest client for Tradebyte",
+  "license": "MIT",
   "authors": [
     {
       "name": "Florian Ressel",
