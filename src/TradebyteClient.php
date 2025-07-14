@@ -9,8 +9,8 @@ final class TradebyteClient
 {
     private Client $client;
     public function __construct(
-        private string $merchantId,
         string $baseUri,
+        private string $merchantId,
         string $username,
         string $password,
     ) {
@@ -25,14 +25,25 @@ final class TradebyteClient
         ]);
     }
 
-    public function get(string $endpoint, array $query = []): array { return $this->request('GET', $endpoint, ['query' => $query]); }
-    public function post(string $endpoint, array $data): array { return $this->request('POST', $endpoint, ['json' => $data]); }
+    public function get(string $endpoint, array $query = []) { return $this->request('GET', $endpoint, ['query' => $query]); }
+    public function post(string $endpoint, array $data) { return $this->request('POST', $endpoint, ['json' => $data]); }
 
-    private function request(string $method, string $uri, array $options): array
+    private function request(string $method, string $uri, array $options)
     {
         try {
             $res = $this->client->request($method, $this->merchantId . '/' . ltrim($uri, '/'), $options);
-            return json_decode($res->getBody()->getContents(), true, flags: JSON_THROW_ON_ERROR);
+
+            $body = $res->getBody();
+            $contents = $body->getContents();
+            $body->rewind();
+
+            $xml = simplexml_load_string($contents);
+
+            if ($xml === false) {
+                return $contents;
+            }
+
+            return $xml;
         } catch (RequestException $e) {
             throw new \RuntimeException("$method $uri failed: " . $e->getMessage());
         }
